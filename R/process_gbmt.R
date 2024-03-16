@@ -100,7 +100,7 @@ calc_occ <- function(gbmt_model) {
   # initiate empty dataframe
   occ_results <- data.frame("group" = c(), "occ" = c())
   
-  for(i in seq(1:length(appa_results))) {
+  for(i in seq(1:length(gbmt_model[["assign.list"]]))) {
     
     # calculate the estimated proportion of patients for each group
     # this is calculated using the sum of the posterior probabilities
@@ -136,7 +136,7 @@ calc_mismatch <- function(gbmt_model) {
   # initiate empty dataframe
   mismatch_results <- data.frame("group" = c(), "mismatch" = c())
   
-  for(i in seq(1:length(appa_results))) {
+  for(i in seq(1:length(gbmt_model[["assign.list"]]))) {
     
     # calculate the estimated proportion of patients for each group
     pi_j <- sum(gbmt_model[["posterior"]][,i]) /length(gbmt_model[["posterior"]][,i])
@@ -189,7 +189,7 @@ calc_sdGmp <- function(gmbt_model) {
   # initiate empty dataframe
   sdGmp_results <- data.frame("group" = c(), "sdGmp" = c())
   
-  for(i in seq(1:length(appa_results))) {
+  for(i in seq(1:length(gbmt_model[["assign.list"]]))) {
   
     # create dataframe for patients assigned to each group
     group_assignments <- data.frame(
