@@ -1,5 +1,5 @@
 ---
-title: "Cluster Stability"
+title: "Evaluation of GBMT"
 output: html_document
 date: "2024-03-18"
 ---
@@ -56,7 +56,7 @@ model_list <- rename_gbmt_results(model_list)
 
 ### Evaluate model statistics across the 10 runs of the model
 
-For each group number between 2-8, we will identify the model with the maximum liklihood and minimum BIC.
+For each group number between 2-8, we will identify the model with the maximum likelihood and minimum BIC.
 
 ```{r}
 model_stats <- get_gbmt_stats(model_list)
@@ -91,6 +91,23 @@ sdGmp_results <- calc_sdGmp(model_list) %>%
   mutate(round_result = round(sdGmp, 4))
 ```
 
+## Proportion of PRF per group
+
+```{r}
+assignments <- assign_group(day5, model_list)
+
+props <- assignments %>% 
+  # first sum total patients in each group
+  group_by(model_number, groups_tested, Group) %>% 
+  mutate(count_n_group = n_distinct(anonymized_id)) %>% 
+  group_by(model_number, groups_tested, Group, is_prolonged_14days) %>% 
+  mutate(count_pts = n_distinct(anonymized_id)) %>% 
+  distinct(model_number, groups_tested, Group, is_prolonged_14days, count_pts, count_n_group) %>% 
+  mutate(prop_outcome = count_pts / count_n_group)
+```
+
+
+
 **need to review occ**
 
 ```{r}
@@ -100,8 +117,8 @@ occ_best_model_3 <- calc_occ(Model_2[[2]]); occ_best_model_3
 
 **Mismatch**
 
-
 **outcome assessment**
 
+**cluster stability**
 
-
+**plots**

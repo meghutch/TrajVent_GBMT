@@ -56,26 +56,39 @@ get_gbmt_stats <- function(gbmt_model_list) {
 assign_group <- function(day_results, gbmt_model_list) {
   
   # initiate empty dataframe 
-  group_df <- data.frame('anonymized_id' = c(), 'group' = c())
+  #group_df <- data.frame()
+  group_clinical_data <- data.frame()
+  
   
   # for each individual model in our list, we will extract the group assignments (`assign.list`)
-  for (i in 1:length(gbmt_model_list[["assign.list"]])) {
+  for(i in names(gbmt_model_list)) {
     
-    group_df_row <- data.frame(
-      anonymized_id = gbmt_model_list[["assign.list"]][[i]]) %>%
-      mutate(group = paste('Group', i, sep = ' ')
-             )
+    for(j in names(gbmt_model_list[[i]])) {
+      
+      # for each group
+      for(k in seq(1:length(gbmt_model_list[[i]][[j]][["assign.list"]]))) {
     
-    group_df <- rbind(group_df, group_df_row) %>% 
-      mutate(anonymized_id = as.integer(anonymized_id))
+        group_df_row <- data.frame(
+          anonymized_id = gbmt_model_list[[i]][[j]][["assign.list"]][[k]]) %>%
+          mutate(model_number = i,
+                 groups_tested = j,
+                 Group = paste('Group', k, sep = ' '),
+                 anonymized_id = as.integer(anonymized_id))
+        
+        # join dataframe of group assignments to clinical outcomes by `Patient_id`
+        group_clinical_df <- left_join(group_df_row, 
+                                       day_results, 
+                                       by = "anonymized_id")
+        
+        #group_df <- rbind(group_df, group_df_row)
+        
+        group_clinical_data <- rbind(group_clinical_data, group_clinical_df)
+        
+      }
+    }
   }
-  
-  # join dataframe of group assignments to clinical outcomes by `Patient_id`
-  group_clinical_data <- left_join(group_df, 
-                                   day_results, 
-                                   by = "anonymized_id")
-  
-  return(group_clinical_data)
+
+   return(group_clinical_data)
   
 }
 
