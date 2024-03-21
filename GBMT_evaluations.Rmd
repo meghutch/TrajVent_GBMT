@@ -100,9 +100,12 @@ props <- assignments %>%
   # first sum total patients in each group
   group_by(model_number, groups_tested, Group) %>% 
   mutate(count_n_group = n_distinct(anonymized_id)) %>% 
+  # group by outcome variable
   group_by(model_number, groups_tested, Group, is_prolonged_14days) %>% 
+  # calculate total number of patients by group with each outcome
   mutate(count_pts = n_distinct(anonymized_id)) %>% 
   distinct(model_number, groups_tested, Group, is_prolonged_14days, count_pts, count_n_group) %>% 
+  # calculate proportion of patients per group with each outcome
   mutate(prop_outcome = count_pts / count_n_group)
 ```
 
