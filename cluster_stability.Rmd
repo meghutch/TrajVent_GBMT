@@ -1,0 +1,107 @@
+---
+title: "Cluster Stability"
+output: html_document
+date: "2024-03-18"
+---
+
+```{r}
+library(tidyverse)
+source("R/process_gbmt.R")
+#source("R/cluster_stability.R")
+```
+
+### Load Data
+
+```{r}
+day5 <- read.csv("/projects/b1196/project_5/data/processed/04_5day_intub.csv")
+```
+
+### Load in data
+
+We will load in the ten models and rename them all 
+
+```{r}
+for(i in list.files("results/Models_logRatio_100_restarts", pattern = ".rda", full.names = TRUE)) {
+  
+  model_num <- regmatches(i, regexpr("Model_\\d{1,2}", i))
+  
+  temp <- load(i) %>% get() 
+  
+  assign(paste(model_num), temp)
+  
+}
+
+# remove unneeded objects
+rm(model_list)
+rm(temp)
+rm(model_num)
+```
+
+```{r}
+# create a list of all models
+model_list <- list("Model_1" = Model_1, 
+                   "Model_2" = Model_2, 
+                   "Model_3" = Model_3, 
+                   "Model_4" = Model_4, 
+                   "Model_5" = Model_5, 
+                   "Model_6" = Model_6, 
+                   "Model_7" = Model_7,
+                   "Model_8" = Model_8,
+                   "Model_9" = Model_9, 
+                   "Model_10" = Model_10)
+
+## assign group numbers to the sublists
+model_list <- rename_gbmt_results(model_list)
+```
+
+### Evaluate model statistics across the 10 runs of the model
+
+For each group number between 2-8, we will identify the model with the maximum liklihood and minimum BIC.
+
+```{r}
+model_stats <- get_gbmt_stats(model_list)
+
+# identify lowest bic per group number across each of the 10x runs
+min_bic_group <- model_stats %>% 
+  group_by(group_number) %>% 
+  filter(logLik == max(logLik))
+
+
+# identify maximum liklihood per group number across each of the 10x runs
+max_ll_group <- model_stats %>% 
+  group_by(group_number) %>% 
+  filter(logLik == max(logLik))
+
+# check if dataframe is identical
+identical(min_bic_group, max_ll_group)
+```
+  
+  
+### Average posterior probability of assginment  
+  
+```{r}
+appa_results <- calc_appa(model_list) 
+```
+
+### SD-GMP (Standard dev of assignment probability per group, based on the indiviudals assigned to that group)
+
+
+```{r}
+sdGmp_results <- calc_sdGmp(model_list) %>% 
+  mutate(round_result = round(sdGmp, 4))
+```
+
+**need to review occ**
+
+```{r}
+occ_best_model_2 <- calc_occ(Model_3[[1]]); occ_best_model_2
+occ_best_model_3 <- calc_occ(Model_2[[2]]); occ_best_model_3
+```
+
+**Mismatch**
+
+
+**outcome assessment**
+
+
+
